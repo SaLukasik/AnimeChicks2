@@ -5,14 +5,17 @@ import sqlite3
 CHICKSNUM = 1000
 
 #Data base initialisation#########################################################################################
-conn = sqlite3.connect('hotchicks.db')
+conn = sqlite3.connect('hotchicks2.db')
 try:
     conn.execute('''CREATE TABLE CHICKS
              (CHICK_ID  NUMBER(6) PRIMARY KEY     NOT NULL,
+             CHICK_ANIME   NUMBER(6)    NOT NULL,
              CHICK_NAME       TEXT     NOT NULL,
              CHICK_GENDER   TEXT,
              CHICK_IMAGE    TEXT,    
-             CHICK_DESC     TEXT);''')
+             CHICK_DESC     TEXT,
+             CHICK_WINS    INT,
+             CHICK_LOSSES   INT);''')
 except:
     print('Chicks table has not been created')
 try:
@@ -55,9 +58,13 @@ headers = {
     'User-Agent': 'My User Agent 1.0',
     'From': 'youremail@domain.com'  # This is another valid field
 }
-def textclr(txt):
-    txt['name'] = txt['name']. replace("'", "`")
-    txt['desc'] = txt['desc']. replace("'", "`")
+def textclr(txt, char):
+    if (char):
+        txt['name'] = txt['name']. replace("'", "`")
+        txt['desc'] = txt['desc']. replace("'", "`")
+    else:
+        txt['anime_name'] = txt['anime_name']. replace("'", "`")
+
 def responder(url, headers):
     response = requests.get(url, headers=headers)
     if (response.status_code == 200):
@@ -75,18 +82,20 @@ for i in range(1,CHICKSNUM+1):
     chickstr = responder(url, headers=headers)
     chickdic = json.loads(chickstr)
     chicksList.append(chickdic)
-    textclr(chickdic)
-    conn.execute(f"INSERT OR REPLACE INTO CHICKS (CHICK_ID,CHICK_NAME,CHICK_GENDER,CHICK_IMAGE,CHICK_DESC ) \
-         VALUES ({chickdic['id']}, '{chickdic['name']}', '{chickdic['gender']}', '{chickdic['character_image']}', '{chickdic['desc']}')");
+    textclr(chickdic, True)
+
+    conn.execute(f"INSERT OR REPLACE INTO CHICKS (CHICK_ID,CHICK_ANIME, CHICK_NAME,CHICK_GENDER,CHICK_IMAGE,CHICK_DESC,CHICK_WINS, CHICK_LOSSES) \
+         VALUES ({chickdic['id']},{chickdic['anime_id']},  '{chickdic['name']}', '{chickdic['gender']}', '{chickdic['character_image']}', '{chickdic['desc']}', 0,0)");
 
     conn.commit()
     print(f"{url} done")
     if (animeid != chickdic['anime_id']):
         animeid = chickdic['anime_id']
-        url = f'https://www.animecharactersdatabase.com/api_series_characters.php?anime_id={i}'
+        url = f'https://www.animecharactersdatabase.com/api_series_characters.php?anime_id={animeid}'
         animestr = responder(url, headers=headers)
         animedic = json.loads(animestr)
         animeList.append(animedic)
+        textclr(animedic, False)
         conn.execute(f"INSERT OR REPLACE INTO ANIME (ANIME_ID,ANIME_TITLE) \
             VALUES ({animedic['anime_id']}, '{animedic['anime_name']}')");
         conn.commit()
