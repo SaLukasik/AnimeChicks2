@@ -1,0 +1,30 @@
+{% extends 'base.html' %} 
+
+{% block body %} 
+
+<h2 style="text-align:center;"> Stats </h2>
+<div style="text-align:center;">
+	<form method = 'POST' action = '/character'>
+	<table class="center">
+		<p> Wyszukaj swoją ulubioną postać! </p>
+		<tr><td><input name='name' type='TEXT' width='60'></td></tr>
+	</table>
+</form>
+</div>
+<div style="text-align:center;">
+	<table class="center">
+		<tr>
+			{% for header in headings %}
+			<th> {{ header }} </th>
+			{% endfor %}
+		</tr>
+		{% for row in data %}
+			<tr>
+			{% for cell in row %}
+			<td> <a href="#">{{ cell }}</a> </td>
+			{% endfor %}
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+{% endblock %}

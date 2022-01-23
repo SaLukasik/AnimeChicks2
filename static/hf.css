@@ -1,0 +1,10 @@
+body {
+  font-family:      Verdana, Geneva, Arial, sans-serif;
+  font-size:        medium;
+  background-color: skyblue;
+}
+
+table.center {
+  margin-left: auto; 
+  margin-right: auto;
+}

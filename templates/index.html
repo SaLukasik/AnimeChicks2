@@ -1,0 +1,51 @@
+{% extends 'base.html' %} 
+
+{% block body %} 
+
+<h2 style="text-align:center;"> Anime Chicks </h2>
+<h4 style="text-align:center;"> Click on the better chick </h4>
+
+<div style="text-align:center;">
+	<a title = "{{ the_chick1[1] }}" href="{{ url_for('click', direction='left') }}">
+		<img src= "{{ the_chick1[3] }}" alt="chick1">
+	</a>
+
+	<a title = "{{ the_chick2[1] }}" href="{{ url_for('click', direction='right')}}">
+	<img src= "{{ the_chick2[3] }}" alt="chick2">
+	</a>
+	<h4 style> Chicks clicked: {{ the_click }} </h4>
+</div>
+
+<div style="text-align:center;">
+	<h4 style="text-align:center;"> See stats: </h4>
+	<a title = "{{ the_chick1['name'] }}" href="{{ url_for('stats') }}">
+		<img src= "{{ '/static/images/papaj.png' }}" alt="chick1">
+	</a>
+</div>
+
+<div style="text-align:center;">
+	<h3> Top 5 </h3>
+
+	<a title = "{{ the_top1['name'], the_top1['count'] }}" href="{{ the_top1['url'] }}">
+	<img height="300" src= "{{ the_top1['image'] }}" alt="chick1">
+	</a>
+
+	<a title = "{{ the_top2['name'], the_top2['count'] }}" href="{{ the_top2['url'] }}">
+	<img height="300" src= "{{ the_top2['image'] }}" alt="chick1">
+	</a>
+
+	<a title = "{{ the_top3['name'], the_top3['count'] }}" href="{{ the_top3['url'] }}">
+	<img height="300" src= "{{ the_top3['image'] }}" alt="chick1">
+	</a>
+
+	<a title = "{{ the_top4['name'], the_top4['count'] }}" href="{{ the_top4['url'] }}">
+	<img height="300" src= "{{ the_top4['image'] }}" alt="chick1">
+	</a>
+
+	<a title = "{{ the_top5['name'], the_top5['count'] }}" href="{{ the_top5['url'] }}">
+	<img height="300" src= "{{ the_top5['image'] }}" alt="chick1">
+	</a>
+</div>
+
+
+{% endblock %}
