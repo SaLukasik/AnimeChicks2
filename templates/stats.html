@@ -4,13 +4,16 @@
 
 <h2 style="text-align:center;"> Stats </h2>
 <div style="text-align:center;">
-	<form method = 'POST' action = '/character'>
+	<form method = 'POST' action = '/stats'>
 	<table class="center">
 		<p> Wyszukaj swoją ulubioną postać! </p>
-		<tr><td><input name='name' type='TEXT' width='60'></td></tr>
+		<tr><td>Character name:</td><td><input name='charactername' type='TEXT' width='60'></td></tr>
+		<tr><td>Anime name:</td><td><input name='animename' type='TEXT' width='60'></td></tr>
 	</table>
-</form>
+	<p><input value = 'Search' type = 'SUBMIT'></p>
+	</form>
 </div>
+<h4 style="text-align:center;"> Click on the name to see more details about character </h4>
 <div style="text-align:center;">
 	<table class="center">
 		<tr>
@@ -21,7 +24,7 @@
 		{% for row in data %}
 			<tr>
 			{% for cell in row %}
-			<td> <a href="#">{{ cell }}</a> </td>
+			<td> <a href="{{ url_for('stats_name', name = row[1])}}">{{ cell }}</a> </td>
 			{% endfor %}
 			</tr>
 		{% endfor %}

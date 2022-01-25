@@ -1,55 +1,76 @@
-from flask import Flask, render_template, url_for, session
+from flask import Flask, render_template, url_for, session, request
 import random, os, pickle
 import sqlite3
 
 app = Flask(__name__)
 
-con = sqlite3.connect('hotchicks.db', check_same_thread=False)
+con = sqlite3.connect('hotchicks2.db', check_same_thread=False)
 cur = con.cursor()
 
-ile_lasek = 100
-
 def top_5():
-		chicks = []
-		for file in os.listdir('pickles/'):
-			if not file.startswith('.'):
-				with open('pickles/'+file, 'rb') as dbfile:
-					x = pickle.load(dbfile)
-					chicks.append(x)
+	data = []
+	for row in cur.execute('SELECT * FROM CHICKS ORDER BY chick_wins DESC LIMIT 5'):
+		data.append(row)
+	return data
+		
 
-		sortedchicks = sorted(chicks, key=lambda i: i['count'], reverse=True)
-		return sortedchicks[0], sortedchicks[1], sortedchicks[2], sortedchicks[3], sortedchicks[4]
-
-@app.route('/stats')
+@app.route('/stats', methods=["GET", "POST"])
 def stats():
 	data = []
-	for row in cur.execute('SELECT chick_name, chick_gender, chick_desc FROM CHICKS ORDER BY chick_id'):
-		data.append(row)
-	headings = ("Name", "Gender", "Description")
-
+	if len(request.form) > 0 and len(request.form['charactername']) > 0 and len(request.form['animename']):
+		for row in cur.execute(
+			'SELECT RANK() OVER (ORDER BY chick_wins DESC) place, chick_name, chick_gender, anime_title, chick_wins, chick_losses FROM CHICKS LEFT JOIN ANIME ON chick_anime = anime_id WHERE chick_name = (?) AND anime_title = (?) ORDER BY place',
+			 (request.form['charactername'], request.form['animename'])):
+			data.append(row)
+	elif len(request.form) > 0 and len(request.form['charactername']) > 0:
+		for row in cur.execute(
+			'SELECT RANK() OVER (ORDER BY chick_wins DESC) place, chick_name, chick_gender, anime_title, chick_wins, chick_losses FROM CHICKS LEFT JOIN ANIME ON chick_anime = anime_id WHERE chick_name = (?) ORDER BY place',
+			 (request.form['charactername'],)):
+			data.append(row)
+	elif len(request.form) > 0 and len(request.form['animename']) > 0:
+		for row in cur.execute(
+			'SELECT RANK() OVER (ORDER BY chick_wins DESC) place, chick_name, chick_gender, anime_title, chick_wins, chick_losses FROM CHICKS LEFT JOIN ANIME ON chick_anime = anime_id WHERE anime_title = (?) ORDER BY place',
+			 (request.form['animename'],)):
+			data.append(row)
+	else:
+		for row in cur.execute(
+			'SELECT RANK() OVER (ORDER BY chick_wins DESC) place, chick_name, chick_gender, anime_title, chick_wins, chick_losses FROM CHICKS LEFT JOIN ANIME ON chick_anime = anime_id ORDER BY place'):
+			data.append(row)
+	headings = ("Place", "Name", "Gender", "Anime", "Wins", "Losses")
 	return render_template('stats.html', headings=headings, data=data)
 
-app.route('/character/<id>')
+@app.route('/stats/<name>')
+def stats_name(name):
+	data = []
+	for row in cur.execute('SELECT chick_name, chick_gender, chick_wins, chick_losses FROM CHICKS WHERE chick_name = (?) ORDER BY chick_wins DESC', (name,)):
+		data.append(row)
+	headings = ("Name", "Gender", "Wins", "Losses")
+	return render_template('stats.html', headings=headings, data=data)
+
+@app.route('/character/<id>')
 def character(id):
 	for row in cur.execute('SELECT * FROM CHICKS WHERE chick_id = (?)', (id)):
 		chick = row
 
-	return render_template('stats.html', headings=headings, data=data)
-
+	return render_template('stats.html', the_chik=chick)
 @app.route('/vote/<direction>')
 def click(direction):
 	try:
 		session['clicked'] += 1
-		girl = session['girl1'] if direction == 'left' else session['girl2']
-
-		with open('pickles/'+girl, 'rb') as dbfile:
-			chick = pickle.load(dbfile)
-			chick['count'] += 1
-		with open('pickles/'+girl, 'wb') as dbfile:
-			pickle.dump(chick, dbfile)   
-
+		if (direction == 'left'):
+			winner = session['girl1']
+			loser = session['girl2']
+		else:
+			winner = session['girl2']
+			loser = session['girl1']
+		cur.execute('UPDATE chicks SET chick_wins = chick_wins + 1 WHERE chick_id = (?)', (winner[0],))
+		cur.execute('UPDATE chicks SET chick_losses = chick_losses + 1 WHERE chick_id = (?)', (loser[0],)) 
+		if winner[0] < loser[0]:
+			cur.execute('UPDATE pojedynek SET result1 = result1 + 1 WHERE id1 = (?)', (winner[0],))
+		else:
+			cur.execute('UPDATE pojedynek SET result2 = result2 + 1 WHERE id2 = (?)', (winner[0],))
+		con.commit()
 		return entry_page()
-
 	except:
 		return entry_page()
 
@@ -68,14 +89,10 @@ def entry_page():
 	session['girl1'] = girl1
 	session['girl2'] = girl2
 
-	top1, top2, top3, top4, top5 = top_5()
+	top5 = top_5()
 
 	return render_template('index.html', the_chick1=list(girl1),
 										 the_chick2=list(girl2),
-										 the_top1 = top1,
-										 the_top2 = top2,
-										 the_top3 = top3,
-										 the_top4 = top4,
 										 the_top5 = top5,
 										 the_click = session['clicked'])
 
