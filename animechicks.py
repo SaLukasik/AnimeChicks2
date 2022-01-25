@@ -79,8 +79,6 @@ def click(direction):
 def entry_page():
 	if 'clicked' not in session:
 		session['clicked'] = 0 
-	files = os.listdir('pickles/')
-
 	for row in cur.execute('SELECT * FROM CHICKS ORDER BY RANDOM() LIMIT 1'):
 		girl1 = row
 	for row in cur.execute('SELECT * FROM CHICKS ORDER BY RANDOM() LIMIT 1'):
