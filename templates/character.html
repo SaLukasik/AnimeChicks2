@@ -1,0 +1,49 @@
+{% extends 'base.html' %} 
+
+{% block body %} 
+
+<div style="text-align:center;">
+	<form method = 'POST' action = '/'>
+	<p><input value = 'Main site' type = 'SUBMIT'></p>
+	</form>
+</div>
+
+<div style="text-align:center;">
+	<h2 style="text-align:center;"> {{ the_character[0] }} </h2>
+	<img height="350" src= "{{ the_character[2] }}" alt="chick1">
+	<h4 style="text-align:center;"> {{ the_character[3] }} </h4>
+</div>
+<div style="text-align:center;">
+	<table class="center">
+		<tr>
+			{% for header in top %}
+			<th> {{ header }} </th>
+			{% endfor %}
+		</tr>
+		<tr>
+		<td> <a>{{ the_character[1] }}</a> </td>
+		<td> <a>{{ the_character[6] }}</a> </td>
+		<td> <a>{{ the_character[4] }}</a> </td>
+		<td> <a>{{ the_character[5] }}</a> </td>
+		</tr>
+	</table>
+</div>
+<h4 style="text-align:center;"> Check the results of duels with other characters  </h4>
+<div style="text-align:center;">
+	<table class="center">
+		<tr>
+			{% for header in headings %}
+			<th> {{ header }} </th>
+			{% endfor %}
+		</tr>
+		{% for row in data %}
+			<tr>
+			<td> <a>{{ row[0] }}</a> </td>
+			<td> <a href="{{ url_for('character', id = row[0])}}">{{ row[1] }}</a> </td>
+			<td> <a>{{ row[2] }}</a> </td>
+			<td> <a>{{ row[3] }}</a> </td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+{% endblock %}
