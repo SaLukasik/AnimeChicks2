@@ -1,2 +1,2 @@
 # AnimeChicks2
-d
+https://kornelhowil.pythonanywhere.com/
